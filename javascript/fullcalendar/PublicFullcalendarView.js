@@ -17,10 +17,23 @@ var PublicFullcalendarView;
 					//center: 'title'
 					right: 'title'
 				},
-				shadedevents: false
+				shadedevents: false,
+				weekMode: 'variable',
+				columnFormat: {
+						month: 'ddd',    // Mon
+						week: 'ddd d/M', // Mon 9/7
+						day: 'dddd d/M'  // Monday 9/7
+				},
+				firstDay: 1, //Start week on monday
+				//time formatting - see more here: http://arshaw.com/fullcalendar/docs/text/timeFormat/
+				timeFormat: {
+					// for agendaWeek and agendaDay
+					agenda: 'h:mm{ - h:mm}', // 5:00 - 6:30
+					// for all other views
+					'': 'h(:mm)tt'            // 7pm
+				}
 			}
 		}
-
 
 		$this.controllerUrl = $this.options.controllerUrl;
 		$this.eventSources = null; //will be initialized
@@ -93,26 +106,8 @@ var PublicFullcalendarView;
 
 		this.init_calendar = function(){
 			var date = new Date();
-			var d = date.getDate();
-			var m = date.getMonth();
-			var y = date.getFullYear();
 
-			holder.fullCalendar({
-				header: $this.options.fullcalendar.header,
-				weekMode: 'variable',
-				columnFormat: {
-						month: 'ddd',    // Mon
-						week: 'ddd d/M', // Mon 9/7
-						day: 'dddd d/M'  // Monday 9/7
-				},
-				firstDay: 1, //Start week on monday
-				//time formatting - see more here: http://arshaw.com/fullcalendar/docs/text/timeFormat/
-				timeFormat: {
-					// for agendaWeek and agendaDay
-					agenda: 'h:mm{ - h:mm}', // 5:00 - 6:30
-					// for all other views
-					'': 'h(:mm)tt'            // 7pm
-				},
+			var calOptions = $.extend( {}, $this.options.fullcalendar,{
 				dayRender: function(date, cell) {
 					$this.dayRender(date, cell);
 				},
@@ -123,6 +118,8 @@ var PublicFullcalendarView;
 				},
 				eventSources: $this.eventSources
 			});
+			
+			holder.fullCalendar(calOptions);
 		}
 
 
