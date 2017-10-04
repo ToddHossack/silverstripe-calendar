@@ -175,7 +175,22 @@ class CalendarAdmin extends LeftAndMain implements PermissionProvider
 			"CMS_ACCESS_CalendarAdmin" => array(
 				'name' => _t('CMSMain.ACCESS', "Access to '{title}' section", array('title' => $title)),
 				'category' => _t('Permission.CMS_ACCESS_CATEGORY', 'CMS Access'),
-				'help' => 'Allow viewing, adding and editing calendars, events, and event categories.'
+				'help' => 'Allow access to calendar management module.'
+			),
+			"CALENDAR_MANAGE" => array(
+				'name' => _t('CalendarAdmin.CALENDAR_MANAGE', 'Manage calendars'),
+				'category' => _t('CalendarAdmin.CALENDAR_PERMISSION_CATEGORY', 'Calender'),
+				'help' => 'Allow creating, editing, and deleting calendars.'
+			),
+			"EVENTCATEGORY_MANAGE" => array(
+				'name' => _t('CalendarAdmin.EVENTCATEGORY_MANAGE', 'Manage event categories'),
+				'category' => _t('CalendarAdmin.CALENDAR_PERMISSION_CATEGORY', 'Calender'),
+				'help' => 'Allow creating, editing, and deleting event categories.'
+			),
+			"EVENT_MANAGE" => array(
+				'name' => _t('CalendarAdmin.EVENT_MANAGE', 'Manage events'),
+				'category' => _t('CalendarAdmin.CALENDAR_PERMISSION_CATEGORY', 'Calender'),
+				'help' => 'Allow creating, editing, and deleting events.'
 			)
 		);
 	}
