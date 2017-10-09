@@ -34,8 +34,8 @@ var PublicFullcalendarView;
 				}
 			}
 		}
-
-		$this.controllerUrl = $this.options.controllerUrl;
+		
+		$this.controllerUrl = null; //will be initialized
 		$this.eventSources = null; //will be initialized
 		$this.shadedEvents = null; //will be initialized if shaded events are enabled
 
@@ -46,6 +46,7 @@ var PublicFullcalendarView;
 			//extending options
 			$this.options = $.extend( {}, $this.options, options );
 
+			$this.controllerUrl = $this.options.controllerUrl;
 			$this.init_eventsources();
 
 			//If shaded events are enabled, these are found via AJAX, and saved in a variable
@@ -79,12 +80,51 @@ var PublicFullcalendarView;
 		 * Building url for a specific action
 		 */
 		this.buildControllerUrl = function(action) {
-			return $this.controllerUrl + action + '/';
+			return this.addSegmentsToUrl($this.controllerUrl,[action]);
 		}
-		this.buildCalendarUrl = function(action) {
-			return $this.calendarUrl + action + '/';
+		
+		this.buildCalendarUrl = function(action,id) {
+			return this.addSegmentsToUrl($this.calendarUrl,[action,id]);
 		}
-
+		
+		/**
+		 * Adds extra segments to existing URL, preserving query parameters
+		 * @param string url
+		 * @param Array segments
+		 * @returns string
+		 */
+		this.addSegmentsToUrl = function(url,segments) {
+			// Check segments
+			if(!segments.length) return url;
+			// Find URL parts
+			var urlParts = this.findUrlParts(url);
+			// Add segments
+			if(segments.constructor === Array) {
+				// Add trailing slash to base URL if necessary
+				if(urlParts['base'].substr(-1) !== '/') {
+					urlParts['base'] += '/';
+				}
+				url = encodeURI(urlParts['base'] + segments.join('/') + '/');
+				if(urlParts['query']) {
+					url += '?' + urlParts['query'];
+				}
+			}
+			return url;			
+		}
+		
+		/**
+		 * Separates URL into base and query parts
+		 * @param string url
+		 * @returns object
+		 */
+		this.findUrlParts = function(url) {
+			var parts = url.split('?');
+			return {
+				base: parts[0],
+				query: parts[1] || ''
+			};
+		}
+			
 		/**
 		 * Event source initialization
 		 * For now we're only getting public events,
@@ -106,7 +146,7 @@ var PublicFullcalendarView;
 
 		this.init_calendar = function(){
 			var date = new Date();
-
+			
 			var calOptions = $.extend( {}, $this.options.fullcalendar,{
 				dayRender: function(date, cell) {
 					$this.dayRender(date, cell);
@@ -114,7 +154,7 @@ var PublicFullcalendarView;
 				eventRender: function (event, element) {
 				},
 				eventClick: function(calEvent, jsEvent, view) {
-					location.href = $this.buildCalendarUrl('detail') + calEvent.id;
+					location.href = $this.buildCalendarUrl('detail',calEvent.id);
 				},
 				eventSources: $this.eventSources
 			});
