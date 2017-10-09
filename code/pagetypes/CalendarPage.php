@@ -102,7 +102,7 @@ class CalendarPage_Controller extends Page_Controller
 
             $url = $this->Link();
             $fullcalendarjs = $s['calendarpage']['fullcalendar_js_settings'];
-			$controllerUrl = $this->addQueryParams($s['calendarpage']['controllerUrl']);
+			$controllerUrl = CalendarHelper::add_preview_params($s['calendarpage']['controllerUrl'],$this->data());
 
             //shaded events
             $shadedEvents = 'false';
@@ -368,38 +368,7 @@ class CalendarPage_Controller extends Page_Controller
 	
 	public function Link($action = null) {
 		$link = parent::Link($action);
-		return $this->addQueryParams($link);
+		return CalendarHelper::add_preview_params($link,$this->data());
 	}
-	
-	public function FullCalendarControllerLink() {
-		
-	}
-	/**
-	 * Adds query parameters for CMSPreview and SubsiteID, if applicable.
-	 * @param type $link
-	 * @return type
-	 */
-	protected function addQueryParams($link)
-	{
-		// Pass through if not logged in
-		if(!Member::currentUserID()) {
-			return $link;
-		}
-		$modifiedLink = '';
-		$request = Controller::curr()->getRequest();
-		if ($request && $request->getVar('CMSPreview')) {
-			// Preserve the preview param for further links
-			$modifiedLink = HTTP::setGetVar('CMSPreview', 1, $link);
-			// Quick fix - multiple uses of setGetVar method double escape the ampersands
-			$modifiedLink = str_replace('&amp;','&',$modifiedLink); 
-			// Add SubsiteID, if applicable
-			if (!empty($this->SubsiteID)) {
-				$modifiedLink = HTTP::setGetVar('SubsiteID', $this->SubsiteID, $modifiedLink);
-				// Quick fix - multiple uses of setGetVar method double escape the ampersands
-				$modifiedLink = str_replace('&amp;','&',$modifiedLink); 
-			}
-		} 
-   
-		return ($modifiedLink) ? $modifiedLink : $link;
-	}
+
 }

@@ -36,7 +36,7 @@ class PublicEvent extends Event
 //			}
 //		} else {
             $calendarPage = CalendarPage::get()->First();
-        return Controller::join_links($calendarPage->Link('detail'),$this->ID);
+        return CalendarHelper::add_preview_params(Controller::join_links($calendarPage->Link('detail'),$this->ID),$this);
 //		}
     }
 }
