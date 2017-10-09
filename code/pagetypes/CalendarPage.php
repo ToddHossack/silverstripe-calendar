@@ -102,6 +102,7 @@ class CalendarPage_Controller extends Page_Controller
 
             $url = $this->Link();
             $fullcalendarjs = $s['calendarpage']['fullcalendar_js_settings'];
+			$controllerUrl = $this->addQueryParams($s['calendarpage']['controllerUrl']);
 
             //shaded events
             $shadedEvents = 'false';
@@ -109,13 +110,14 @@ class CalendarPage_Controller extends Page_Controller
             if ($sC['shading']) {
                 $shadedEvents = 'true';
             }
-
+			
             //Calendar initialization (and possibility for later configuration options)
             Requirements::customScript("
 				(function($) {
 					$(function () {
 						//Initializing fullcalendar
 						var cal = new PublicFullcalendarView($('#calendar'), '$url', {
+							controllerUrl: '$controllerUrl',
 							fullcalendar: {
 								$fullcalendarjs
 							},
@@ -303,8 +305,9 @@ class CalendarPage_Controller extends Page_Controller
     public function NextMonthLink()
     {
         $month = $this->NextMonth();
-        $url = $this->Link() . $this->request->param('Action') . '/?month=' . $month;
-        return $url;
+        $url = $this->Link($this->request->param('Action'));
+		$url = HTTP::setGetVar('month',$month,$url);
+        return url;
     }
     public function PrevMonth()
     {
@@ -318,7 +321,8 @@ class CalendarPage_Controller extends Page_Controller
     public function PrevMonthLink()
     {
         $month = $this->PrevMonth();
-        $url = $this->Link() . $this->request->param('Action') . '/?month=' . $month;
+		$url = $this->Link($this->request->param('Action'));
+		$url = HTTP::setGetVar('month',$month,$url);
         return $url;
     }
 
@@ -327,22 +331,20 @@ class CalendarPage_Controller extends Page_Controller
     {
         $s = CalendarConfig::subpackage_settings('pagetypes');
         $indexSetting = $s['calendarpage']['index'];
-        $link = $this->Link();
         if ($indexSetting == 'eventlist') {
-            return $link;
+            return $this->Link();
         } elseif ($indexSetting == 'calendarview') {
-            return $link . 'eventlist/';
+            return $this->Link('eventlist');
         }
     }
     public function CalendarViewLink()
     {
         $s = CalendarConfig::subpackage_settings('pagetypes');
         $indexSetting = $s['calendarpage']['index'];
-        $link = $this->Link();
         if ($indexSetting == 'eventlist') {
-            return $link . 'calendarview/';
+            return $this->Link('calendarview');
         } elseif ($indexSetting == 'calendarview') {
-            return $link;
+            return $this->Link();
         }
     }
 
@@ -362,4 +364,42 @@ class CalendarPage_Controller extends Page_Controller
         $calendars = PublicCalendar::get();
         return $calendars;
     }
+	
+	
+	public function Link($action = null) {
+		$link = parent::Link($action);
+		return $this->addQueryParams($link);
+	}
+	
+	public function FullCalendarControllerLink() {
+		
+	}
+	/**
+	 * Adds query parameters for CMSPreview and SubsiteID, if applicable.
+	 * @param type $link
+	 * @return type
+	 */
+	protected function addQueryParams($link)
+	{
+		// Pass through if not logged in
+		if(!Member::currentUserID()) {
+			return $link;
+		}
+		$modifiedLink = '';
+		$request = Controller::curr()->getRequest();
+		if ($request && $request->getVar('CMSPreview')) {
+			// Preserve the preview param for further links
+			$modifiedLink = HTTP::setGetVar('CMSPreview', 1, $link);
+			// Quick fix - multiple uses of setGetVar method double escape the ampersands
+			$modifiedLink = str_replace('&amp;','&',$modifiedLink); 
+			// Add SubsiteID, if applicable
+			if (!empty($this->SubsiteID)) {
+				$modifiedLink = HTTP::setGetVar('SubsiteID', $this->SubsiteID, $modifiedLink);
+				// Quick fix - multiple uses of setGetVar method double escape the ampersands
+				$modifiedLink = str_replace('&amp;','&',$modifiedLink); 
+			}
+		} 
+   
+		return ($modifiedLink) ? $modifiedLink : $link;
+	}
 }
