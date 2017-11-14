@@ -82,14 +82,27 @@ class Event extends DataObject
         //This only happens if allday events are enabled
         //NOTE: Currently it seems to me as if there should be no need to disable allday events
         if (CalendarConfig::subpackage_setting('events', 'enable_allday_events')) {
+            $startTime = date("H:i:s", strtotime($this->StartDateTime));
+          
             //This only happens on first save to correct for the rare cases that someone might
             //actually want to add an event like this
             if (!$this->ID) {
-                if (date("H:i", strtotime($this->StartDateTime))  == '00:00') {
+                if ($startTime == '00:00:00') {
                     $this->AllDay = true;
                     if ($debug) {
                         $this->debugLog('Converted to allday event as the entered time was 00:00');
                     }
+                }
+            }
+            
+            // Ensure start and end times are set to appropriate values for all day events
+            if($this->AllDay) {
+                if($startTime !== '00:00:00') {
+                    $this->StartDateTime = date("Y-m-d", strtotime($this->StartDateTime)) .' 00:00:00';
+                }
+                $endTime = date("H:i:s", strtotime($this->EndDateTime));
+                if($endTime !== '23:59:59') {
+                    $this->EndDateTime = date("Y-m-d", strtotime($this->EndDateTime)) .' 23:59:59';
                 }
             }
         }
@@ -302,11 +315,10 @@ class Event extends DataObject
             $timeFrameHeaderText = 'End Date / Time (optional)';
         }
 
-
         $fields = FieldList::create(
             TextField::create('Title')
                 ->setAttribute('placeholder', 'Enter a title'),
-            CheckboxField::create('AllDay', 'All-day'),
+            CheckboxField::create('AllDay',_t('Event.AllDay','All-day')),
             $startDateTime = DatetimeField::create('StartDateTime', 'Start'),
             //NoEnd field - will only be shown if end dates are not enforced - see below
             CheckboxField::create('NoEnd', 'Open End'),
