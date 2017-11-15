@@ -20,7 +20,7 @@ class EventsForm extends CMSForm
         $gridEventConfig->removeComponentsByType('GridFieldDataColumns');
         $dataColumns = new GridFieldDataColumns();
 
-        $summaryFields = Event::$summary_fields;
+        $summaryFields = singleton('Event')->summaryFields();
         //Show the page if the event is connected to an event page
         if (CalendarConfig::subpackage_setting('pagetypes', 'enable_eventpage')) {
             $summaryFields['getEventPageCalendarTitle'] = 'Page';
