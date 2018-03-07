@@ -2,6 +2,8 @@
 class ColorpaletteField extends DropdownField
 {
 
+    protected $hasEmptyDefault = true;
+    
     public function __construct($name, $title = null, $source = null, $value = "", $form=null)
     {
         if (!is_array($source)) {
@@ -20,6 +22,7 @@ class ColorpaletteField extends DropdownField
 
         //adding the current value to the mix if isn't in the array
         $val = $this->getColorWithHash();
+    
         $this->value = $val;
         $source[$val] = $val;
 
@@ -38,7 +41,7 @@ class ColorpaletteField extends DropdownField
     public function getColorWithHash()
     {
         $color = $this->value;
-        if (strpos($color, '#') === false) {
+        if (strlen($color) && strpos($color, '#') === false) {
             return '#' . $color;
         } else {
             return $color;
