@@ -149,24 +149,9 @@ class FullcalendarController extends Controller
         $result = array();
         if ($events) {
             foreach ($events as $event) {
-                $calendar = $event->Calendar();
-
-                $bgColor = '#999'; //default
-            $textColor = '#FFF'; //default
-            $borderColor = '#555';
-
-                if ($calendar->exists()) {
-                    $bgColor = $calendar->getColorWithHash();
-                    $textColor = '#FFF';
-                    $borderColor = $calendar->getColorWithHash();
-                }
-
+                $colors = $this->determineEventColors($event);
                 $resultArr = self::format_event_for_fullcalendar($event);
-                $resultArr = array_merge($resultArr, array(
-                'backgroundColor' => $bgColor,
-                'textColor' => '#FFF',
-                'borderColor' => $borderColor,
-            ));
+                $resultArr = array_merge($resultArr, $colors);
                 $result[] = $resultArr;
             }
         }
@@ -179,6 +164,51 @@ class FullcalendarController extends Controller
             return $result;
         }
     }
+    
+    /**
+     * Determines the event color based on category color or calendar color (in that
+     * order of precedence).
+     * @param Event $event
+     * @return array
+     */
+    protected function determineEventColors($event)
+    {
+        // Defaults
+        $colors = array(
+            'backgroundColor' => '#999',
+            'textColor' => '#FFF',
+            'borderColor' => '#555'
+        );
+  
+        // If category colors enabled, use color of first category with a color
+        // @todo With respect to colors and multiple categories, it may be better 
+        // to somehow have a primary category designation and use the color from that category?
+        if(EventCategory::has_extension('CalendarColorExtension')) {
+            $categories = $event->Categories();
+            foreach($categories as $category) {
+                $color = $category->getColorWithHash();
+                if(strlen($color) > 1) {
+                    $colorModified = true;
+                    $colors['backgroundColor'] = $color;
+                    $colors['borderColor'] = $color;
+
+                    return $colors;
+                }
+            }
+        }
+        
+        // Fallback to calendar color, if available
+        $calendar = $event->Calendar();
+        if ($calendar && $calendar->exists() 
+            && $calendar->hasExtension('CalendarColorExtension')) {
+            $color = $calendar->getColorWithHash();
+            $colors['backgroundColor'] = $color;
+            $colors['borderColor'] = $color;
+        }
+        
+        return $colors;
+    }
+    
     /**
      * Shaded events controller
      * Shaded events for the calendar are called once on calendar initialization,

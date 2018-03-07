@@ -75,8 +75,7 @@ class CalendarConfig
         ),
         'categories' => array(
             'enabled' => true,
-            //colors not yet implemented:
-            //'colors' => true
+            'colors' => false
         ),
         'registrations' => array(
             'enabled' => false,
@@ -241,6 +240,14 @@ class CalendarConfig
                     Object::add_extension('Event', 'EventCategoryExtension');
                 } else {
                     Event::add_extension('EventCategoryExtension');
+                }
+                $c = self::subpackage_settings('categories');
+                if (!empty($c['colors'])) {
+                    if ($ssversion == '3.0') {
+                        Object::add_extension('EventCategory', 'CalendarColorExtension');
+                    } else {
+                        EventCategory::add_extension('CalendarColorExtension');
+                    }
                 }
             }
             //Enabling Event Page
