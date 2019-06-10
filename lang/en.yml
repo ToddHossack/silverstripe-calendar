@@ -13,6 +13,7 @@ en:
     PAST_EVENT_PLURAL: 'Past events'
     Title: 'Title'
     AllDay: 'All-day'
+    TBA: 'TBA'
     NoEnd: 'No end'
     StartDateTime: 'Start Date and Time'
     StartDate: 'Start date'

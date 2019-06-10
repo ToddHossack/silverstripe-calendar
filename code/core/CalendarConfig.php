@@ -36,6 +36,8 @@ class CalendarConfig
         //the events subpackage is needed and cannot be disabled,
         //but it can be configured
         'events' => array(
+            'date_format' => 'j F, Y',
+            'time_format' => 'g:ia',
             //allow setting an event as "all day" through a checkbox
             'enable_allday_events' => true,
             //by default the calendar enforces end date/time (or duration), and either won't validate if

@@ -115,11 +115,21 @@ class FullcalendarController extends Controller
             $calendarsSupplied = true;
         }
 
+        /*
         $events = PublicEvent::get()
             ->filter(array(
                 'StartDateTime:GreaterThan' => $this->eventlistOffsetDate('start', $request->postVar('start'), $offset),
                 'EndDateTime:LessThan' => $this->eventlistOffsetDate('end', $request->postVar('end'), $offset),
             ));
+        */
+        // StartDateTime constraint for events
+        $events = PublicEvent::get()->where(array(
+            '"Event"."StartDateTime" > ?' => $this->eventlistOffsetDate('start', $request->postVar('start'), $offset)
+        ));
+        // EndDateTime constraint for events: allow for events with no end date time
+        $events = $events->where(array(
+            '"Event"."EndDateTime" IS NULL OR "Event"."EndDateTime" < ?' => $this->eventlistOffsetDate('end', $request->postVar('end'), $offset)
+        ));
 
         //If shaded events are enabled we need to filter shaded calendars out
         //note that this only takes effect when no calendars have been supplied
@@ -277,7 +287,7 @@ class FullcalendarController extends Controller
             'title'     => $event->Title,
             'start'     => self::format_datetime_for_fullcalendar($event->StartDateTime),
             'end'       => self::format_datetime_for_fullcalendar($event->EndDateTime),
-            'allDay'        => $event->isAllDay(),
+            'allDay'    => $event->isAllDay() || $event->isTba(),
             'className' => $event->ClassName,
             //event calendar
             'backgroundColor' => $bgColor,

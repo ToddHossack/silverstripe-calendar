@@ -23,7 +23,6 @@ class EventHelper
      */
     public static function formatted_dates($startObj, $endObj)
     {
-
         //Checking if end date is set
         $endDateIsset = true;
         if (isset($endObj->value)) {
@@ -58,29 +57,35 @@ class EventHelper
 
     public static function formatted_alldates($startObj, $endObj)
     {
+        $dateFormat = CalendarConfig::subpackage_setting('events', 'date_format');
+        $timeFormat = CalendarConfig::subpackage_setting('events', 'time_format');
+
         $startDate = date("Y-m-d", strtotime($startObj->value));
         $endDate = date("Y-m-d", strtotime($endObj->value));
 
-        if ($startDate == $endDate) {
+        // Check if event covers only single day (use formatted_timeframe instead)
+        if (($startDate && !$endObj->value) || ($startDate == $endDate)) {
             return false;
         }
 
         $startTime = strtotime($startObj->value);
         $endTime = strtotime($endObj->value);
-
+        
         if (date('g:ia', $startTime) == '12:00am') {
-            $startDate = date('j F, Y', $startTime);
+            $startDate = date($dateFormat, $startTime);     // No start time, so do not include
         } else {
-            $startDate = date('j F, Y (g:ia)', $startTime);
+            $startDate = date($dateFormat .' '.$timeFormat, $startTime);
         }
-
-        if (date('g:ia', $endTime) == '12:00am') {
-            $endDate = date('j F, Y', $endTime);
+        
+        if(!$endTime) {
+            $endDate = '';
+        } elseif (date('g:ia', $endTime) == '12:00am') {
+            $endDate = date($dateFormat, $endTime);         
         } else {
-            $endDate = date('j F, Y (g:ia)', $endTime);
+            $endDate = date($dateFormat .' '.$timeFormat, $endTime);
         }
-
-        return $startDate." &ndash; ".$endDate;
+ 
+        return $startDate . ($endDate ? " &ndash; " . $endDate : '');
     }
 
     /**
@@ -91,28 +96,30 @@ class EventHelper
      * @param string $endStr
      * @return string|null
      */
-    public static function formatted_timeframe($startStr, $endStr)
+    public static function formatted_timeframe($startObj, $endObj)
     {
+        $timeFormat = CalendarConfig::subpackage_setting('events', 'time_format');
+        $allDayEnabled = CalendarConfig::subpackage_setting('events', 'enable_allday_events');
         $str = null;
 
-        if ($startStr == $endStr) {
-            return null;
+        $startTime = strtotime($startObj->value);
+        $endTime = strtotime($endObj->value);
+        
+        if (!$allDayEnabled && date('g:ia', $startTime) == '12:00am' && !$endObj->value) {
+            return _t('Event.TBA','TBA');
         }
-
-        $startTime = strtotime($startStr->value);
-        $endTime = strtotime($endStr->value);
-
+        
         if ($startTime == $endTime) {
             return null;
         }
-
-        if ($endStr) {
+        
+        if ($endObj->value) {
             //time frame is only applicable if both start and end time is on the same day
             if (date('Y-m-d', $startTime) == date('Y-m-d', $endTime)) {
-                $str = date('g:ia', $startTime) . ' - ' . date('g:ia', $endTime);
+                $str = date($timeFormat, $startTime) . ' &ndash; ' . date($timeFormat, $endTime);
             }
         } else {
-            $str = date('g:ia', $startTime);
+            $str = date($timeFormat, $startTime);
         }
 
         return $str;

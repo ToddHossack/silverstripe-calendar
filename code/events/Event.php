@@ -152,7 +152,7 @@ class Event extends DataObject
         //Should only be triggered, if EndDateTime is set
 
         if (isset($this->EndDateTime)) {
-            if (strtotime($this->EndDateTime) < strtotime($this->StartDateTime)) {
+            if ($this->EndDateTime && strtotime($this->EndDateTime) < strtotime($this->StartDateTime)) {
                 $this->EndDateTime = $this->StartDateTime;
                 $this->AllDay = true;
                 $msg = "Sanity check 2: Setting end date = start date and setting all day \n"
@@ -291,7 +291,7 @@ class Event extends DataObject
         if ($this->AllDay) {
             return true;
         }
-
+  
         $secsInDay = 60 * 60 * 24;
         $startTime = strtotime($this->StartDateTime);
         $endTime = strtotime($this->EndDateTime);
@@ -301,6 +301,10 @@ class Event extends DataObject
         }
     }
 
+    public function isTba() 
+    {
+        return (date('g:ia',strtotime($this->StartDateTime)) === '12:00am' && !$this->EndDateTime);
+    }
 
     /**
      * Frontend fields
@@ -397,8 +401,9 @@ class Event extends DataObject
         //moving all day further down for CMS fields
         $allDay = $fields->dataFieldByName('AllDay');
         //$fields->removeByName('AllDay');
-        $fields->addFieldToTab('Root.Main',
-            $allDay, 'TimeFrameHeader');
+        if($allDay) {
+            $fields->addFieldToTab('Root.Main', $allDay, 'TimeFrameHeader');
+        }
 
         $fields->addFieldToTab('Root.Details', $details = HtmlEditorField::create('Details', ''));
         $details->addExtraClass('stacked');
