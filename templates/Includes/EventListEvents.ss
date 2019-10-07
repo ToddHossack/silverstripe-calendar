@@ -12,7 +12,7 @@
 			<span class="month">$StartDateTime.Format('F, Y')</span>
 		</div>
 		<div class="content">
-			<h4><a href="$InternalLink" class="eventHeadline">$Title</a></h4>
+			<h4><a href="$Top.EventLink($ID)" class="eventHeadline">$Title</a></h4>
 			<div class="datesAndTimeframe">
 				<% if StartAndEndDates %>
 					<span>$StartAndEndDates</span>
@@ -27,13 +27,13 @@
 			<div class="details">$DetailsSummary</div>
 			<% if $Registerable %>
 				<% if not $IsPastEvent %>
-					<a href="$InternalLink" class="doRegister">Register</a>
+					<a href="$Top.EventLink($ID)" class="doRegister">Register</a>
 				<% else %>
 					<span style="color:#813d00;width:80px;text-align:center;font-size:12px;">Registration now closed</span>
 				<% end_if %>
-				<a href="$InternalLink" class="readMore">Read More</a>
+				<a href="$Top.EventLink($ID)" class="readMore">Read More</a>
 			<% else %>
-				<a href="$InternalLink" class="readMore">Read More</a>
+				<a href="$Top.EventLink($ID)" class="readMore">Read More</a>
 			<% end_if %>
 		</div>
 	</div>

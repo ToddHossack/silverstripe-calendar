@@ -11,6 +11,16 @@ class CalendarPage extends Page
 
     public static $singular_name = 'Calendar Page';
     public static $description = 'Listing of public events';
+    
+    /**
+     * Generates a link for the event maintaining correct calendar page context.
+     * @param int|string (numeric) $eventID
+     * @return string
+     */
+    public function EventLink($eventID)
+    {
+        return CalendarHelper::add_preview_params(Controller::join_links($this->Link('detail'),$eventID),$this);
+    }
 }
 
 class CalendarPage_Controller extends Page_Controller
@@ -260,6 +270,15 @@ class CalendarPage_Controller extends Page_Controller
 //		return $list;
     }
 
+    /**
+     * @see CalendarPage::EventLink
+     * @param int|string (numeric) $eventID
+     * @return string
+     */
+    public function EventLink($eventID)
+    {
+        return $this->dataRecord->EventLink($eventID);
+    }
     /**
      * Renders the current calendar, if a calenar link has been supplied via the url
      */
